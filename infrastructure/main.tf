@@ -11,11 +11,25 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
     }
+    snowflake = {
+      source = "snowflakedb/snowflake"
+      version = "2.12.0"
+    }
   }
+
 }
 
 provider "aws" {
   region = "eu-north-1"
+}
+
+provider "snowflake" {
+  organization_name = var.org_name
+  account_name      = var.account_name
+  user              = var.snowflake_user
+  password          = var.snowflake_password
+  role              = var.snowflake_role
+  warehouse         = var.snowflake_warehouse
 }
 
 #Creates a random bucket-id every time
@@ -26,7 +40,7 @@ resource "random_id" "rng" {
   byte_length = 8
 }
 
-module "amazon_data" {
+module "s3" {
   source      = "./modules/s3"
   bucket_name = "terraform-amazon-review-data-${random_id.rng.hex}"
   tags = {
@@ -35,6 +49,19 @@ module "amazon_data" {
   }
 }
 
+module "snowflake" {
+  source = "./modules/snowflake"
+
+  org_name = var.org_name
+  account_name      = var.account_name
+  snowflake_user              = var.snowflake_user
+  snowflake_password          = var.snowflake_password
+  snowflake_role              = var.snowflake_role
+  snowflake_warehouse         = var.snowflake_warehouse
+
+  database_name = var.database_name
+  schema_name   = var.schema_name
+}
 output "bucket_id" {
-  value = module.amazon_data.bucket_id
+  value = module.s3.bucket_id
 }

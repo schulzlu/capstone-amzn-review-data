@@ -40,3 +40,4 @@ variable "schema_name" {
   description = "Snowflake schema name"
   type        = string
 }
+
