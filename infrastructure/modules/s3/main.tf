@@ -7,11 +7,20 @@ terraform {
 }
 resource "aws_s3_bucket" "this" {
   bucket = var.bucket_name
+  force_destroy = var.force_destroy
 
   tags = merge(
     { Name = var.bucket_name },
     var.tags
   )
+}
+
+resource "aws_s3_object" "prefixes" {
+  for_each = var.prefixes
+
+  bucket  = aws_s3_bucket.this.id
+  key     = each.value
+  content = ""
 }
 
 # block public access (recommended)

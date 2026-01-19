@@ -16,7 +16,6 @@ terraform {
       version = "2.12.0"
     }
   }
-
 }
 
 provider "aws" {
@@ -43,6 +42,14 @@ resource "random_id" "rng" {
 module "s3" {
   source      = "./modules/s3"
   bucket_name = "terraform-amazon-review-data-${random_id.rng.hex}"
+  force_destroy = true   # dev only
+
+  prefixes = [
+    "raw/",
+    "scripts/",
+    "tmp/",
+    "flattened/"
+  ]
   tags = {
     owner = "DATAENG"
     env   = "dev"
@@ -62,6 +69,11 @@ module "snowflake" {
   database_name = var.database_name
   schema_name   = var.schema_name
 }
-output "bucket_id" {
-  value = module.s3.bucket_id
+
+module "glue" {
+  source = "./modules/glue"
+
+  job_name       = "raw-ingestion-job"
+  script_bucket  = module.s3.bucket_id
+  raw_bucket     = module.s3.bucket_id
 }
