@@ -1,5 +1,10 @@
-variable "job_name" {
-  description = "Glue job name"
+variable "job_name_ingest" {
+  description = "Glue job name for ingest data"
+  type        = string
+}
+
+variable "job_name_flat" {
+  description = "Glue job name for flatten data"
   type        = string
 }
 

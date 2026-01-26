@@ -1,42 +1,52 @@
+variable "project_prefix" {
+  type        = string
+  description = "Prefix used for naming Snowflake database/schema when defaults are used."
+  default     = "capstone_amazon"
+}
+
 variable "org_name" {
-  description = "Organization name of the snowflake account"
-  type      = string
+  type        = string
+  description = "The Snowflake organization name. The 'snowflake_account' variable is deprecated."
+  # It is best practice to provide this value in a .tfvars file or as an environment variable.
 }
 
 variable "account_name" {
-  description = "Name of the snowflake account"
-  type      = string
+  type        = string
+  description = "The Snowflake account name within the organization. The 'snowflake_account' variable is deprecated."
+  # It is best practice to provide this value in a .tfvars file or as an environment variable.
 }
 
 variable "snowflake_user" {
-  description = "User of the snowflake account"
-  type      = string
+  type        = string
+  description = "Snowflake user used by Terraform. The 'username' parameter is deprecated."
 }
 
 variable "snowflake_password" {
-  description = "Password of the snowflake account"
-  type      = string
-  sensitive = true
+  type        = string
+  description = "Password for Snowflake user (use GitHub Secrets or env vars)."
+  sensitive   = true
 }
 
 variable "snowflake_role" {
-  description = "Role of the snowflake account"
-  type      = string
-  default = "PUBLIC"
+  type        = string
+  description = "Snowflake role to use (e.g. SYSADMIN)."
+  default     = "SYSADMIN"
 }
 
 variable "snowflake_warehouse" {
-  description = "Warehouse of the snowflake account"
-  type      = string
-  default = "COMPUTE_WH"
+  type        = string
+  description = "Snowflake Warehouse."
+  default     = "COMPUTE_WH"
 }
 
 variable "database_name" {
-  description = "Snowflake database name"
   type        = string
+  description = "Optional database name. If empty, will be derived from project_prefix."
+  default     = ""
 }
 
 variable "schema_name" {
-  description = "Snowflake schema name"
   type        = string
+  description = "Optional schema name. If empty, will be derived from project_prefix."
+  default     = ""
 }

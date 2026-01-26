@@ -24,6 +24,7 @@ resource "aws_iam_role_policy" "glue" {
         Action = [
           "s3:GetObject",
           "s3:PutObject",
+          "s3:DeleteObject",
           "s3:ListBucket"
         ]
         Resource = [
@@ -45,7 +46,7 @@ resource "aws_iam_role_policy" "glue" {
 }
 
 # 🔹 Upload Glue script
-resource "aws_s3_object" "glue_script" {
+resource "aws_s3_object" "ingest_glue_script" {
   bucket = var.script_bucket
   key    = "scripts/ingest_data.py"
 
@@ -53,14 +54,22 @@ resource "aws_s3_object" "glue_script" {
   etag   = filemd5("${path.module}/jobs/ingest_data.py")
 }
 
+resource "aws_s3_object" "flatten_glue_script" {
+  bucket = var.script_bucket
+  key    = "scripts/flatten_data.py"
+
+  source = "${path.module}/jobs/flatten_data.py"
+  etag   = filemd5("${path.module}/jobs/flatten_data.py")
+}
+
 # 🔹 Glue job
 resource "aws_glue_job" "ingest" {
-  name     = var.job_name
+  name     = var.job_name_ingest
   role_arn = aws_iam_role.glue.arn
 
   command {
     name            = "glueetl"
-    script_location = "s3://${var.script_bucket}/${aws_s3_object.glue_script.key}"
+    script_location = "s3://${var.script_bucket}/${aws_s3_object.ingest_glue_script.key}"
     python_version  = "3"
   }
 
@@ -71,6 +80,29 @@ resource "aws_glue_job" "ingest" {
   default_arguments = {
     "--RAW_BUCKET" = var.raw_bucket
     "--RAW_PREFIX" = "raw"
+    "--TempDir"    = "s3://${var.script_bucket}/tmp/"
+  }
+}
+
+resource "aws_glue_job" "flatten" {
+  name     = var.job_name_flat
+  role_arn = aws_iam_role.glue.arn
+
+  command {
+    name            = "glueetl"
+    script_location = "s3://${var.script_bucket}/${aws_s3_object.flatten_glue_script.key}"
+    python_version  = "3"
+  }
+
+  glue_version       = "4.0"
+  number_of_workers = 2
+  worker_type        = "G.1X"
+
+  default_arguments = {
+    "--RAW_BUCKET" = var.raw_bucket
+    "--RAW_PREFIX" = "raw"
+    "--FLATTENED_BUCKET" = var.raw_bucket
+    "--FLATTENED_PREFIX" = "flattened"
     "--TempDir"    = "s3://${var.script_bucket}/tmp/"
   }
 }

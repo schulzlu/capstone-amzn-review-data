@@ -19,6 +19,13 @@ variable "snowflake_password" {
   sensitive = true
 }
 
+variable "snowflake_aws_account_id" {
+  description = "Complete arn of the aws user configured in snowflake"
+  type      = string
+  sensitive = true
+}
+
+
 variable "snowflake_role" {
   description = "Role of the snowflake account"
   type      = string
