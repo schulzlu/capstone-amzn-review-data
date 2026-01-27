@@ -3,6 +3,11 @@ variable "job_name_ingest" {
   type        = string
 }
 
+# variable "job_name_clean_meta" {
+#   description = "Glue job name for clean meta_data"
+#   type        = string
+# }
+
 variable "job_name_flat" {
   description = "Glue job name for flatten data"
   type        = string

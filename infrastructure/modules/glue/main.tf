@@ -37,6 +37,25 @@ resource "aws_iam_role_policy" "glue" {
       {
         Effect = "Allow"
         Action = [
+          "glue:GetDatabase",
+          "glue:GetDatabases",
+          "glue:CreateTable",
+          "glue:UpdateTable",
+          "glue:GetTable",
+          "glue:GetTables",
+          "glue:DeleteTable",
+          "glue:GetPartition",
+          "glue:GetPartitions",
+          "glue:BatchCreatePartition",
+          "glue:BatchGetPartition",
+          "glue:BatchDeletePartition",
+          "glue:BatchUpdatePartition"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "logs:*"
         ]
         Resource = "*"
@@ -61,6 +80,7 @@ resource "aws_s3_object" "flatten_glue_script" {
   source = "${path.module}/jobs/flatten_data.py"
   etag   = filemd5("${path.module}/jobs/flatten_data.py")
 }
+
 
 # 🔹 Glue job
 resource "aws_glue_job" "ingest" {
@@ -105,4 +125,31 @@ resource "aws_glue_job" "flatten" {
     "--FLATTENED_PREFIX" = "flattened"
     "--TempDir"    = "s3://${var.script_bucket}/tmp/"
   }
+}
+
+resource "aws_glue_crawler" "parquet_crawler" {
+  name          = "amazon-review-parquet-crawler"
+  role          = aws_iam_role.glue.arn
+  database_name = aws_glue_catalog_database.parquet_db.name
+
+  s3_target {
+    path = "s3://${var.raw_bucket}/flattened/reviews/"
+  }
+
+  s3_target {
+    path = "s3://${var.raw_bucket}/flattened/meta_data/"
+  }
+
+  configuration = jsonencode({
+    Version = 1.0
+    CrawlerOutput = {
+      Partitions = { AddOrUpdateBehavior = "InheritFromTable" }
+    }
+  })
+}
+
+# Glue catalog database
+resource "aws_glue_catalog_database" "parquet_db" {
+  name        = "amazon_review_db"
+  description = "Database for parquet data processed by Glue job"
 }
