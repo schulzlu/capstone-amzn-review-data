@@ -1,0 +1,13 @@
+amazon_project:
+  target: dev
+  outputs:
+    dev:
+      type: athena
+      region_name: eu-north-1
+      s3_staging_dir: s3://capstone-athena-dump-2026/staging/
+      s3_tmp_table_dir: s3://capstone-athena-dump-2026/tmp/
+      database: awsdatacatalog
+      schema: amazon_review_db
+      work_group: primary
+      threads: 4
+      aws_profile_name: default

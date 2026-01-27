@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: glue_raw
+    database: awsdatacatalog
+    schema: amazon_review_db
+    tables:
+      - name: reviews
+      - name: meta_data
