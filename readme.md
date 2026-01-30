@@ -37,7 +37,8 @@ The solution is built using AWS-native services and Infrastructure as Code (IaC)
 
 QuickSight dashboards provide insights into fashion trends, pricing, categories, and product performance.
 
-![QuickSight Dashboard](images/diagrams1.png)(images/diagrams2.png)
+![QuickSight Dashboard](images/diagrams1.png)
+![QuickSight Dashboard](images/diagrams2.png)
 
 ---
 
